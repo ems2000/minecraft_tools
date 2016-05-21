@@ -9,6 +9,22 @@ from mc import *
 Blocks = {}
 for key, value in mcpi.block.__dict__.iteritems():
     key = key.replace('HARDENED_CLAY_STAINED', 'STAINED_HARDENED_CLAY')
+    key = key.replace('REDSTONE_LAMP_INACTIVE', 'REDSTONE_LAMP')
+    key = key.replace('_SPRUCE', '')
+    key = key.replace('_DECAYABLE', '')
+    key = key.replace('_PERMANENT', '')
+    key = key.replace('WOOD_BUTTON', 'WOODEN_BUTTON')
+    key = key.replace('GLOWSTONE_BLOCK', 'GLOWSTONE')
+    key = key.replace('SNOW_BLOCK', 'SNOW')
+    key = key.replace('SUGAR_CANE', 'REEDS')
+    key = key.replace('DOOR_IRON', 'IRON_DOOR')
+    key = key.replace('FURNACE_INACTIVE', 'FURNACE')
+    key = key.replace('MOSS_STONE', 'MOSSY_COBBLESTONE')
+    key = key.replace('STONE_SLAB_DOUBLE', 'DOUBLE_STONE_SLAB')
+    key = key.replace('COBWEB', 'WEB')
+    key = key.replace('LAZULI', '')
+    key = key.replace('WOOD_PLANKS', 'PLANKS')
+    key = key.replace('STONE_BRICK', 'STONEBRICK')
     key = key.replace('', '')
     Blocks[key] = value
 
@@ -26,35 +42,47 @@ def lookupBlock(blockName):
     """
     blockName = blockName.upper()
     try:
-        name, data = blockName.rsplit('_', 1)
-    except ValueError:
-        block = Blocks[blockName]
-    else:
         try:
-            data = int(data)
+            name, data = blockName.rsplit('_', 1)
         except ValueError:
-            block = Blocks[blockName]
-            return block
-        block = Block(Blocks[name].id, data)
-    return block
+            return Blocks[blockName]
+        else:
+            try:
+                data = int(data)
+            except ValueError:
+                return Blocks[blockName]
+            return Block(Blocks[name].id, data)
+    except KeyError:
+        print 'Invalid block name:', blockName
+        sys.exit()
 
 def ring(center, r, block, height=1):
     """ Create a ring around center of radius r blocks using block type """
 
     block = lookupBlock(block)
-    c = 2 * math.pi * r
-    #print "Circumference:", c
-    for point in xrange(0, int(round(c))):
-        angle = point * 360 / c
-        radians = math.radians(angle)
-        x = int(round(r * math.cos(radians)))
-        z = int(round(r * math.sin(radians)))
-        
-        for y in xrange(height):
-            #print point, x, y, z
-            mc.setBlock(center.x + x, center.y + y, center.z + z, block)
-            
-
+    x = r
+    z = 0
+    y = 0
+    while z < x:
+        mc.setBlock(center.x + x, center.y + y, center.z + z, block)
+        mc.setBlock(center.x + z, center.y + y, center.z + x, block)
+        mc.setBlock(center.x - x, center.y + y, center.z - z, block)
+        mc.setBlock(center.x - z, center.y + y, center.z - x, block)
+        mc.setBlock(center.x + x, center.y + y, center.z - z, block)
+        mc.setBlock(center.x + z, center.y + y, center.z - x, block)
+        mc.setBlock(center.x - x, center.y + y, center.z + z, block)
+        mc.setBlock(center.x - z, center.y + y, center.z + x, block)
+        oldx = x
+        z += 1
+        x = sqrt(r * r - z * z)
+        x = int(round(x))
+    if oldx != z:
+        mc.setBlock(center.x + x, center.y + y, center.z + z, block)
+        mc.setBlock(center.x - x, center.y + y, center.z - z, block)
+        mc.setBlock(center.x + x, center.y + y, center.z - z, block)
+        mc.setBlock(center.x - x, center.y + y, center.z + z, block)
+    mc.setBlock(center.x, center.y - 1, center.z, WOOL)
+    
 try:
     __file__
 except: 
@@ -73,6 +101,7 @@ playerPos = mc.player.getPos()
 operations = {
     'ring': "Usage: /py shape ring <radius> <block> [height]",
     'hill': "Usage: /py shape hill <radius> <height>",
+    'circle': "Usage: /py shape circle <radius> <block>, [height]"
     }
 
 if operation not in operations:
@@ -93,5 +122,6 @@ for param in sys.argv[2:]:
         params.append(param)
 
 globals()[operation](playerPos, *params)
+print "Created a", operation 
     
         
