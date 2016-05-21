@@ -56,7 +56,7 @@ def lookupBlock(blockName):
         print 'Invalid block name:', blockName
         sys.exit()
 
-def ring(center, r, block, height=1):
+def smallRing(center, r, block):
     """ Create a ring around center of radius r blocks using block type """
 
     block = lookupBlock(block)
@@ -81,8 +81,14 @@ def ring(center, r, block, height=1):
         mc.setBlock(center.x - x, center.y + y, center.z - z, block)
         mc.setBlock(center.x + x, center.y + y, center.z - z, block)
         mc.setBlock(center.x - x, center.y + y, center.z + z, block)
+
+def ring(center, r, block, height=1):
     mc.setBlock(center.x, center.y - 1, center.z, WOOL)
-    
+    for y in xrange(height):
+        newPos = mcpi.vec3.Vec3(center.x, center.y + y, center.z)
+        smallRing(newPos, r, block)
+        print center.y
+       
 try:
     __file__
 except: 
