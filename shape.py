@@ -62,39 +62,77 @@ def smallRing(center, r, block):
     block = lookupBlock(block)
     x = r
     z = 0
-    y = 0
     while z < x:
-        mc.setBlock(center.x + x, center.y + y, center.z + z, block)
-        mc.setBlock(center.x + z, center.y + y, center.z + x, block)
-        mc.setBlock(center.x - x, center.y + y, center.z - z, block)
-        mc.setBlock(center.x - z, center.y + y, center.z - x, block)
-        mc.setBlock(center.x + x, center.y + y, center.z - z, block)
-        mc.setBlock(center.x + z, center.y + y, center.z - x, block)
-        mc.setBlock(center.x - x, center.y + y, center.z + z, block)
-        mc.setBlock(center.x - z, center.y + y, center.z + x, block)
+        mc.setBlock(center.x + x, center.y, center.z + z, block)
+        mc.setBlock(center.x + z, center.y, center.z + x, block)
+        mc.setBlock(center.x - x, center.y, center.z - z, block)
+        mc.setBlock(center.x - z, center.y, center.z - x, block)
+        mc.setBlock(center.x + x, center.y, center.z - z, block)
+        mc.setBlock(center.x + z, center.y, center.z - x, block)
+        mc.setBlock(center.x - x, center.y, center.z + z, block)
+        mc.setBlock(center.x - z, center.y, center.z + x, block)
         oldx = x
         z += 1
         x = sqrt(r * r - z * z)
         x = int(round(x))
     if oldx != z:
-        mc.setBlock(center.x + x, center.y + y, center.z + z, block)
-        mc.setBlock(center.x - x, center.y + y, center.z - z, block)
-        mc.setBlock(center.x + x, center.y + y, center.z - z, block)
-        mc.setBlock(center.x - x, center.y + y, center.z + z, block)
+        mc.setBlock(center.x + x, center.y, center.z + z, block)
+        mc.setBlock(center.x - x, center.y, center.z - z, block)
+        mc.setBlock(center.x + x, center.y, center.z - z, block)
+        mc.setBlock(center.x - x, center.y, center.z + z, block)
 
 def ring(center, r, block, height=1):
     mc.setBlock(center.x, center.y - 1, center.z, WOOL)
     for y in xrange(height):
         newPos = mcpi.vec3.Vec3(center.x, center.y + y, center.z)
         smallRing(newPos, r, block)
-        print center.y
-       
+
+def smalldisk(center, r, block):
+    block = lookupBlock(block)
+    x = r
+    z = 0
+    while z < x:
+        for newx in xrange(-x, x + 1):
+            mc.setBlock(center.x + newx, center.y, center.z + z, block)
+            mc.setBlock(center.x + newx, center.y, center.z - z, block)
+            
+        oldx = x
+        z += 1
+        x = sqrt(r * r - z * z)
+        x = int(round(x))
+    if oldx != z:
+        for x in xrange(-x,x):
+            mc.setBlock(center.x + x, center.y, center.z + z, block)
+            mc.setBlock(center.x - x, center.y, center.z - z, block)
+            mc.setBlock(center.x + x, center.y, center.z - z, block)
+            mc.setBlock(center.x - x, center.y, center.z + z, block)
+    x = r
+    z = 0
+    print "stuff"
+    while z < x:
+        for newz in xrange(oldx, x + 1):
+            mc.setBlock(center.x + z, center.y, center.z + newz, block)
+            mc.setBlock(center.x + z, center.y, center.z - newz, block)
+            mc.setBlock(center.x - z, center.y, center.z + newz, block)
+            mc.setBlock(center.x - z, center.y, center.z - newz, block)
+        z += 1
+        x = sqrt(r * r - z * z)
+        x = int(round(x))
+
+        
+def disk(center, r, block, height=1):
+    for y in xrange(height):
+        newPos = mcpi.vec3.Vec3(center.x, center.y + y, center.z)
+        smalldisk(newPos, r, block)
+
+
+
 try:
     __file__
 except: 
     sys.argv = [sys.argv[0], '20', '3']
 
-message = "Usage: /py shape <ring|hill>"
+message = "Usage: /py shape <ring|hill|disk>"
 try:
     operation = sys.argv[1]
 except IndexError:
@@ -107,7 +145,7 @@ playerPos = mc.player.getPos()
 operations = {
     'ring': "Usage: /py shape ring <radius> <block> [height]",
     'hill': "Usage: /py shape hill <radius> <height>",
-    'circle': "Usage: /py shape circle <radius> <block>, [height]"
+    'disk': "Usage: /py shape disk <radius> <block>, [height]"
     }
 
 if operation not in operations:
